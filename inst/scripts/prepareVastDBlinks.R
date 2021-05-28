@@ -26,12 +26,9 @@ vastdbLinks$file    <- sprintf("http://vastdb.crg.eu/libs/vastdb.%s.%s.tar.gz",
                                tolower(vastdbLinks$key), vastdbLinks$version)
 
 # Get taxonomy id based on species ---------------------------------------------
-require("GenomeInfoDbData")
-data(specData)
-vals <- paste(specData$genus, specData$species)
-vastdbLinks$tax_id <- specData$tax_id[match(vastdbLinks$species, vals)]
+vastdbLinks$tax_id <- getTaxonomyId(vastdbLinks$species)
 
-# Define id and file name ------------------------------------------------------
+# Define ID and file name ------------------------------------------------------
 vastdbLinks$id  <- sprintf("%s (%s, %s)", vastdbLinks$species,
                            vastdbLinks$assembly, vastdbLinks$key)
 vastdbLinks$rds <- sprintf("alternativeSplicingEvents.%s.%s.rds",
