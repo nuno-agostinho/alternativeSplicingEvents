@@ -1,0 +1,17 @@
+Package: alternativeSplicingEvents
+Type: Package
+Title: Alternative splicing annotation for AnnotationHub
+Version: 1.0.0
+Author: Nuno Agostinho
+Maintainer: Nuno Agostinho <nunodanielagostinho@gmail.com>
+Description: Alternative splicing annotation for multiple species. These
+    annotations are based on the VastDB files used by the alternative splicing
+    quantification program VAST-TOOLS.
+Imports: AnnotationHub
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+biocViews: AnnotationHub
+URL: https://github.com/nuno-agostinho/alternativeSplicingEvents
+BugReports: https://github.com/nuno-agostinho/alternativeSplicingEvents/issues
+.
