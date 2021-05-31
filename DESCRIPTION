@@ -13,7 +13,8 @@ LazyData: true
 Suggests:
   GenomeInfoDbData,
   pbapply,
-  psichomics
+  psichomics,
+  R.utils
 biocViews: AnnotationHub
 URL: https://github.com/nuno-agostinho/alternativeSplicingEvents
 BugReports: https://github.com/nuno-agostinho/alternativeSplicingEvents/issues

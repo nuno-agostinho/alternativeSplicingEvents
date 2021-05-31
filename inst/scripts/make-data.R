@@ -6,6 +6,7 @@ outFolder <- "VastDB"
 require(pbapply)
 source(system.file("scripts/prepareVastDBlinks.R",
                    package="alternativeSplicingEvents"))
+library(alternativeSplicingEvents)
 
 # Download VastDB annotation files ---------------------------------------------
 dir.create(outFolder)
