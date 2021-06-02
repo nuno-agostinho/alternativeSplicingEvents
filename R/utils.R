@@ -15,6 +15,7 @@ downloadVastDBannot <- function(species, urls, outFolder, cleanUp=TRUE) {
   if (!file.exists(destfile)) download.file(url, destfile, mode="wb")
   
   # Extract annotation directory (named "TEMPLATES") and VAST-TOOLS identifiers
+  message("Extracting VastDB annotation and identifiers...")
   annot  <- file.path(species, "TEMPLATES")
   vastID <- file.path(species, "FILES", sprintf("New_ID-%s.txt.gz", species))
   untar(destfile, files=c(annot, vastID), exdir=outFolder)
@@ -28,9 +29,15 @@ downloadVastDBannot <- function(species, urls, outFolder, cleanUp=TRUE) {
   return(TRUE)
 }
 
-appendNewVastIDcolumn <- function(events, annot, key) {
-  vastID <- file.path(annot, "FILES", sprintf("New_ID-%s.txt", key))
-  vastID <- read.delim(vastID)
+readVastIDfile <- function(dir, key) {
+  vastID <- file.path(dir, key, "FILES", sprintf("New_ID-%s.txt", key))
+  vastID <- read.delim(vastID, header=FALSE)
+  colnames(vastID) <- c("NEW_ID", "OLD_ID")
+  return(vastID)
+}
+
+appendNewVastIDcolumn <- function(events, dir, key) {
+  vastID <- readVastIDfile(dir, key)
   for (i in seq(events)) {
     matchingID <- match(events[[i]][["VAST-TOOLS.Event.ID"]], vastID$OLD_ID)
     events[[i]][["New.VAST-TOOLS.Event.ID"]] <- vastID$NEW_ID[matchingID]
@@ -39,8 +46,8 @@ appendNewVastIDcolumn <- function(events, annot, key) {
 }
 
 #' @importFrom psichomics parseVastToolsAnnotation prepareAnnotationFromEvents
-saveRDSfromVastDBannot <- function(annot, vastdbLinks, outdir) {
-  key <- basename(annot)
+saveRDSfromVastDBannot <- function(key, vastdbLinks, outdir) {
+  annot <- file.path(outdir, key)
   matched <- match(key, vastdbLinks$key)
   if (is.na(matched)) {
     msg <- sprintf("Skipping %s (no VastDB match found in metadata)...", annot)
@@ -55,7 +62,7 @@ saveRDSfromVastDBannot <- function(annot, vastdbLinks, outdir) {
     
     # Prepare annotation and append new VAST-TOOLS identifiers
     events <- prepareAnnotationFromEvents(parsed)
-    events <- appendNewVastIDcolumn(events, annot, key)
+    events <- appendNewVastIDcolumn(events, outdir, key)
     
     # Save as RDS
     filename <- vastdbLinks$rds[matched]
@@ -64,4 +71,35 @@ saveRDSfromVastDBannot <- function(annot, vastdbLinks, outdir) {
     message(sprintf("Annotation saved as %s", filename))
   }
   return(events)
+}
+
+# Checks -----------------------------------------------------------------------
+getFilesKey <- function(i) {
+  gsub(".*\\.([A-Za-z0-9]{3,})\\..*", "\\1", i, perl=TRUE)
+}
+
+checkEventTypes <- function(i) {
+  types <- c("Alternative 3' splice site",
+             "Alternative 5' splice site",
+             "Retained intron",
+             "Skipped exon")
+  all(names(i) %in% types)
+}
+
+checkIfVastToolsIDsMatch <- function(rds, outdir) {
+  checkVastToolsIDmatch <- function(file, outdir, rds) {
+    key <- getFilesKey(file)
+    vastID <- readVastIDfile(outdir, key)
+    
+    for (type in rds[[file]]) {
+      # Get random samples
+      s <- sample(na.omit(type$`New.VAST-TOOLS.Event.ID`), 50)
+      a <- type$`VAST-TOOLS.Event.ID`[match(s, type$`New.VAST-TOOLS.Event.ID`)]
+      b <- vastID$OLD_ID[match(s, vastID$NEW_ID)]
+      if (!all(a == b)) stop("Event IDs not matching for", type)
+    }
+    return(TRUE)
+  }
+  res <- all(pbsapply(names(rds), checkVastToolsIDmatch, outdir, rds))
+  return(res)
 }
