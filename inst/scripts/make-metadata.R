@@ -23,7 +23,7 @@ metadata <- data.frame(
   BiocVersion=biocVersion,
   Coordinate_1_based=TRUE,
   ResourceName=vastdbLinks$rds,
-  Tags=(c("Alternative, Splicing, Events, Annotation")))
+  Tags=(c("Alternative:Splicing:Events:Annotation")))
 
 vastdbVersion <- unique(vastdbLinks$version)
 if (length(vastdbVersion) > 1) {

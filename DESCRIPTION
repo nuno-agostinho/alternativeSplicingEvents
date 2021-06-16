@@ -15,7 +15,7 @@ Suggests:
   pbapply,
   psichomics,
   R.utils
-biocViews: AnnotationHub
+biocViews: AnnotationHub, AnnotationData
 URL: https://github.com/nuno-agostinho/alternativeSplicingEvents
 BugReports: https://github.com/nuno-agostinho/alternativeSplicingEvents/issues
 RoxygenNote: 7.1.1
